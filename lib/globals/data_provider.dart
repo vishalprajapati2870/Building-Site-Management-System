@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:building_site_build_by_vishal/models/site_model.dart';
 import 'package:nowa_runtime/nowa_runtime.dart';
+import 'package:building_site_build_by_vishal/models/site_model.dart';
 import 'package:building_site_build_by_vishal/models/assignment_model.dart';
 import 'package:building_site_build_by_vishal/models/time_log_model.dart';
 import 'package:building_site_build_by_vishal/models/user_model.dart';
+import 'package:building_site_build_by_vishal/globals/demo_data.dart';
 import 'package:provider/provider.dart';
 
 @NowaGenerated()
@@ -44,55 +45,17 @@ class DataProvider extends ChangeNotifier {
     return _isLoading;
   }
 
+  bool _mockDataSeeded = false;
+
   void initializeMockData(String ownerId) {
-    _sites = [
-      SiteModel(
-        id: 'site1',
-        ownerId: ownerId,
-        name: 'Downtown Construction Site',
-        address: '123 Main St, City',
-        lat: 37.7749,
-        lng: -122.4194,
-        geofenceRadiusMeters: 150,
-        isActive: true,
-      ),
-      SiteModel(
-        id: 'site2',
-        ownerId: ownerId,
-        name: 'Riverside Building Project',
-        address: '456 River Rd, City',
-        lat: 37.7849,
-        lng: -122.4094,
-        geofenceRadiusMeters: 200,
-        isActive: true,
-      ),
-    ];
-    _workers = [
-      UserModel(
-        id: 'worker1',
-        name: 'John Smith',
-        email: 'john@worker.com',
-        role: 'worker',
-        skills: ['Carpentry', 'Masonry'],
-        hourlyRate: 35,
-      ),
-      UserModel(
-        id: 'worker2',
-        name: 'Maria Garcia',
-        email: 'maria@worker.com',
-        role: 'worker',
-        skills: ['Electrical', 'Plumbing'],
-        hourlyRate: 42,
-      ),
-      UserModel(
-        id: 'worker3',
-        name: 'James Wilson',
-        email: 'james@worker.com',
-        role: 'worker',
-        skills: ['Welding', 'Heavy Equipment'],
-        hourlyRate: 38,
-      ),
-    ];
+    if (_mockDataSeeded) {
+      return;
+    }
+    _sites = DemoData.buildSites(ownerId);
+    _workers = DemoData.workers;
+    _assignments = DemoData.initialAssignments(ownerId);
+    _timeLogs = DemoData.initialTimeLogs();
+    _mockDataSeeded = true;
     notifyListeners();
   }
 

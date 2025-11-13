@@ -165,8 +165,8 @@ class _SiteDetailsPageState extends State<SiteDetailsPage> {
                       Text(
                         'Assigned Workers',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                       FilledButton.icon(
                         onPressed: _showAssignWorkerDialog,
@@ -214,12 +214,10 @@ class _SiteDetailsPageState extends State<SiteDetailsPage> {
                         final workerList = dataProvider.workers
                             .where((w) => w.id == assignment.workerId)
                             .toList();
-                        final worker = workerList.isNotEmpty
-                            ? workerList.first
-                            : null;
-                        final workerName = worker != null
-                            ? worker.name
-                            : 'Unknown Worker';
+                        final worker =
+                            workerList.isNotEmpty ? workerList.first : null;
+                        final workerName =
+                            worker != null ? worker.name : 'Unknown Worker';
                         return Card(
                           elevation: 0,
                           shape: RoundedRectangleBorder(

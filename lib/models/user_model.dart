@@ -71,4 +71,31 @@ class UserModel {
     }
     return data;
   }
+
+  UserModel copyWith({
+    String? id,
+    String? name,
+    String? email,
+    String? role,
+    List<String>? skills,
+    double? hourlyRate,
+    String? photoUrl,
+    DateTime? createdAt,
+  }) {
+    return UserModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      role: role ?? this.role,
+      skills: skills ??
+          (this.skills != null ? List<String>.from(this.skills!) : null),
+      hourlyRate: hourlyRate ?? this.hourlyRate,
+      photoUrl: photoUrl ?? this.photoUrl,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  UserModel clone() {
+    return copyWith();
+  }
 }

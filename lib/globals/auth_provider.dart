@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:building_site_build_by_vishal/models/user_model.dart';
 import 'package:nowa_runtime/nowa_runtime.dart';
+import 'package:building_site_build_by_vishal/models/user_model.dart';
+import 'package:building_site_build_by_vishal/globals/demo_data.dart';
+import 'package:building_site_build_by_vishal/globals/data_provider.dart';
 import 'package:provider/provider.dart';
 
 @NowaGenerated()
@@ -41,19 +43,36 @@ class AuthProvider extends ChangeNotifier {
     return _currentUser?.role == 'worker';
   }
 
-  Future<bool> signIn(String email, String password) async {
+  Future<bool> signIn(
+    BuildContext context,
+    String email,
+    String password,
+  ) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
     try {
       await Future.delayed(const Duration(seconds: 1));
-      _currentUser = UserModel(
-        id: 'user_${DateTime.now().millisecondsSinceEpoch}',
-        name: 'Demo User',
-        email: email,
-        role: email.contains('owner') ? 'owner' : 'worker',
-        createdAt: DateTime.now(),
-      );
+
+      final normalizedEmail = DemoData.normalizeEmail(email);
+      final storedPassword = DemoData.passwordForEmail(normalizedEmail);
+      final user = DemoData.userForEmail(normalizedEmail);
+
+      if (storedPassword == null ||
+          user == null ||
+          storedPassword != password) {
+        _errorMessage = 'Invalid email or password';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      _currentUser = user;
+      final dataProvider = DataProvider.of(context, listen: false);
+      final String ownerIdForSeed =
+          user.role == 'owner' ? user.id! : DemoData.primaryOwner.id!;
+      dataProvider.initializeMockData(ownerIdForSeed);
+
       _isLoading = false;
       notifyListeners();
       return true;

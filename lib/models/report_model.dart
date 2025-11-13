@@ -24,9 +24,8 @@ class ReportModel {
       totalHours: json['totalHours'] != null
           ? (json['totalHours'] as num).toDouble()
           : 0,
-      overtime: json['overtime'] != null
-          ? (json['overtime'] as num).toDouble()
-          : 0,
+      overtime:
+          json['overtime'] != null ? (json['overtime'] as num).toDouble() : 0,
       attendanceRate: json['attendanceRate'] != null
           ? (json['attendanceRate'] as num).toDouble()
           : 0,

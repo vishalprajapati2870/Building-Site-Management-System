@@ -114,19 +114,19 @@ class _AssignmentsTab extends StatelessWidget {
                   Text(
                     'No assignments for today',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withValues(alpha: 0.5),
-                    ),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.5),
+                        ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Check back later or contact your manager',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withValues(alpha: 0.4),
-                    ),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.4),
+                        ),
                   ),
                 ],
               ),
@@ -159,9 +159,10 @@ class _HistoryTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dataProvider = DataProvider.of(context, listen: true);
-    final timeLogs =
-        dataProvider.timeLogs.where((log) => log.workerId == workerId).toList()
-          ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    final timeLogs = dataProvider.timeLogs
+        .where((log) => log.workerId == workerId)
+        .toList()
+      ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
     return timeLogs.isEmpty
         ? Center(
             child: Column(
@@ -178,10 +179,10 @@ class _HistoryTab extends StatelessWidget {
                 Text(
                   'No history yet',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: 0.5),
-                  ),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.5),
+                      ),
                 ),
               ],
             ),
@@ -225,13 +226,17 @@ class _HistoryTab extends StatelessWidget {
                           children: [
                             Text(
                               isCheckIn ? 'Check In' : 'Check Out',
-                              style: Theme.of(context).textTheme.titleSmall
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleSmall
                                   ?.copyWith(fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               '${log.timestamp.day}/${log.timestamp.month}/${log.timestamp.year} at ${log.timestamp.hour}:${log.timestamp.minute.toString().padLeft(2, '0')}',
-                              style: Theme.of(context).textTheme.bodySmall
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
                                   ?.copyWith(
                                     color: Theme.of(context)
                                         .colorScheme
@@ -297,10 +302,10 @@ class _ProfileTab extends StatelessWidget {
           Text(
             user?.email ?? '',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(
-                context,
-              ).colorScheme.onSurface.withValues(alpha: 0.7),
-            ),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.7),
+                ),
           ),
           const SizedBox(height: 32),
           if (user?.skills != null && user!.skills!.isNotEmpty)
@@ -316,8 +321,8 @@ class _ProfileTab extends StatelessWidget {
                   Text(
                     'Skills',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                   const SizedBox(height: 12),
                   Wrap(
@@ -348,9 +353,26 @@ class _ProfileTab extends StatelessWidget {
               trailing: Text(
                 '\$${user?.hourlyRate?.toStringAsFixed(2)}',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+              ),
+              tileColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          const SizedBox(height: 16),
+          if (user?.createdAt != null)
+            ListTile(
+              leading: Icon(
+                Icons.calendar_today_outlined,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              title: const Text('Member Since'),
+              subtitle: Text(
+                '${user!.createdAt!.day}/${user.createdAt!.month}/${user.createdAt!.year}',
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
               tileColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               shape: RoundedRectangleBorder(

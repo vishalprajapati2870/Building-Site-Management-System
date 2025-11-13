@@ -33,6 +33,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _handleLogin() async {
     final authProvider = AuthProvider.of(context);
     final bool success = await authProvider.signIn(
+      context,
       _emailController.text.trim(),
       _passwordController.text,
     );
@@ -72,19 +73,19 @@ class _LoginPageState extends State<LoginPage> {
                 Text(
                   'SiteGuard',
                   style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Construction Site Management',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: 0.7),
-                  ),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.7),
+                      ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 60),
@@ -171,18 +172,23 @@ class _LoginPageState extends State<LoginPage> {
                       Text(
                         'Demo Accounts:',
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                       const SizedBox(height: 8),
-                      Text(
+                      ...[
                         'Owner: owner@demo.com / password',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Worker: worker@demo.com / password',
-                        style: Theme.of(context).textTheme.bodySmall,
+                        'Worker 1: worker@demo.com / password',
+                        'Worker 2: worker2@demo.com / password',
+                        'Worker 3: worker3@demo.com / password',
+                      ].map(
+                        (text) => Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Text(
+                            text,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ),
                       ),
                     ],
                   ),

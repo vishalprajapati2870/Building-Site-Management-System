@@ -190,8 +190,8 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
                     Text(
                       'Your Sites',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     TextButton.icon(
                       onPressed: () {
@@ -223,7 +223,9 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
                         const SizedBox(height: 16),
                         Text(
                           'No sites yet',
-                          style: Theme.of(context).textTheme.bodyLarge
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyLarge
                               ?.copyWith(
                                 color: Theme.of(
                                   context,
@@ -233,7 +235,9 @@ class _OwnerDashboardPageState extends State<OwnerDashboardPage> {
                         const SizedBox(height: 8),
                         Text(
                           'Tap the + button to add your first site',
-                          style: Theme.of(context).textTheme.bodyMedium
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
                               ?.copyWith(
                                 color: Theme.of(
                                   context,
@@ -417,17 +421,17 @@ class _StatCard extends StatelessWidget {
           Text(
             value,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
           ),
           Text(
             title,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(
-                context,
-              ).colorScheme.onSurface.withValues(alpha: 0.7),
-            ),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.7),
+                ),
           ),
         ],
       ),

@@ -125,8 +125,7 @@ class _CheckInPageState extends State<CheckInPage> {
   Widget build(BuildContext context) {
     final dataProvider = DataProvider.of(context, listen: true);
     final site = dataProvider.getSiteById(widget.assignment.siteId);
-    final bool isWithinGeofence =
-        _distanceFromSite != null &&
+    final bool isWithinGeofence = _distanceFromSite != null &&
         site != null &&
         _distanceFromSite! <= site!.geofenceRadiusMeters;
     return Scaffold(
@@ -160,18 +159,18 @@ class _CheckInPageState extends State<CheckInPage> {
                   Text(
                     site?.name ?? 'Unknown Site',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     site?.address ?? '',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withValues(alpha: 0.7),
-                    ),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.7),
+                        ),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -190,8 +189,8 @@ class _CheckInPageState extends State<CheckInPage> {
                   Text(
                     'Location Status',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                   const SizedBox(height: 16),
                   Row(
@@ -216,7 +215,9 @@ class _CheckInPageState extends State<CheckInPage> {
                                       _distanceFromSite!,
                                     )
                                   : 'Calculating...',
-                              style: Theme.of(context).textTheme.titleMedium
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
                                   ?.copyWith(fontWeight: FontWeight.bold),
                             ),
                           ],
@@ -312,9 +313,9 @@ class _CheckInPageState extends State<CheckInPage> {
                       Text(
                         'Anti-Fraud Protection',
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue[800],
-                        ),
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue[800],
+                            ),
                       ),
                     ],
                   ),

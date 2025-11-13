@@ -89,7 +89,9 @@ class _ReportsPageState extends State<ReportsPage> {
                               ),
                               Text(
                                 '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
-                                style: Theme.of(context).textTheme.titleMedium
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
                                     ?.copyWith(fontWeight: FontWeight.bold),
                               ),
                             ],
@@ -273,9 +275,8 @@ class _ReportsPageState extends State<ReportsPage> {
                       ),
                       trailing: Icon(
                         log.serverValidated ? Icons.verified : Icons.pending,
-                        color: log.serverValidated
-                            ? Colors.green
-                            : Colors.orange,
+                        color:
+                            log.serverValidated ? Colors.green : Colors.orange,
                       ),
                     ),
                   );
@@ -339,10 +340,10 @@ class _MetricCard extends StatelessWidget {
           Text(
             title,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(
-                context,
-              ).colorScheme.onSurface.withValues(alpha: 0.7),
-            ),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.7),
+                ),
           ),
           Text(
             unit,
