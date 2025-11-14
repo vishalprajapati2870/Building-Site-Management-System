@@ -32,8 +32,32 @@ class _AssignWorkerDialogState extends State<AssignWorkerDialog> {
       ).showSnackBar(const SnackBar(content: Text('Please select a worker')));
       return;
     }
+    
     final authProvider = AuthProvider.of(context, listen: false);
     final dataProvider = DataProvider.of(context, listen: false);
+    
+    // Check if worker is already assigned
+    final firebaseService = dataProvider.firebaseService;
+    final isAlreadyAssigned = await firebaseService.isWorkerAlreadyAssigned(
+      widget.siteId,
+      _selectedWorkerId!,
+      _startTime,
+      _endTime,
+    );
+    
+    if (isAlreadyAssigned) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('This worker is already assigned to this site during the selected time period'),
+            backgroundColor: Colors.orange,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+      return;
+    }
+    
     final assignment = AssignmentModel(
       id: 'assignment_${DateTime.now().millisecondsSinceEpoch}',
       siteId: widget.siteId,
@@ -44,7 +68,8 @@ class _AssignWorkerDialogState extends State<AssignWorkerDialog> {
       status: 'pending',
       createdAt: DateTime.now(),
     );
-    dataProvider.addAssignment(assignment);
+    
+    await dataProvider.addAssignment(assignment);
     if (mounted) {
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(

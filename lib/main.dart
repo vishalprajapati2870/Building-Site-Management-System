@@ -6,6 +6,7 @@ import 'package:building_site_build_by_vishal/globals/auth_provider.dart';
 import 'package:building_site_build_by_vishal/globals/app_state.dart';
 import 'package:building_site_build_by_vishal/pages/home_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 @NowaGenerated({'visibleInNowa': false})
 class MyApp extends StatelessWidget {
@@ -38,6 +39,14 @@ late final SharedPreferences sharedPrefs;
 main() async {
   WidgetsFlutterBinding.ensureInitialized();
   sharedPrefs = await SharedPreferences.getInstance();
+
+  // Initialize Firebase
+  try {
+    await Firebase.initializeApp();
+  } catch (e) {
+    // Firebase might not be configured yet - app will use fallback mock data
+    debugPrint('Firebase initialization error: $e');
+  }
 
   runApp(const MyApp());
 }

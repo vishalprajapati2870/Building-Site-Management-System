@@ -3,21 +3,41 @@ import 'package:nowa_runtime/nowa_runtime.dart';
 import 'package:building_site_build_by_vishal/models/user_model.dart';
 import 'package:building_site_build_by_vishal/globals/demo_data.dart';
 import 'package:building_site_build_by_vishal/globals/data_provider.dart';
+import 'package:building_site_build_by_vishal/services/firebase_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 
 @NowaGenerated()
 class AuthProvider extends ChangeNotifier {
-  AuthProvider();
+  AuthProvider() {
+    _init();
+  }
 
   factory AuthProvider.of(BuildContext context, {bool listen = false}) {
     return Provider.of<AuthProvider>(context, listen: listen);
   }
 
+  final FirebaseService _firebaseService = FirebaseService();
   UserModel? _currentUser;
 
   bool _isLoading = false;
 
   String? _errorMessage;
+
+  void _init() {
+    FirebaseAuth.instance.authStateChanges().listen((User? firebaseUser) async {
+      if (firebaseUser != null) {
+        final userModel = await _firebaseService.getUser(firebaseUser.uid);
+        if (userModel != null) {
+          _currentUser = userModel;
+          notifyListeners();
+        }
+      } else {
+        _currentUser = null;
+        notifyListeners();
+      }
+    });
+  }
 
   UserModel? get currentUser {
     return _currentUser;
@@ -47,13 +67,30 @@ class AuthProvider extends ChangeNotifier {
     BuildContext context,
     String email,
     String password,
-  ) async {
+    ) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
     try {
-      await Future.delayed(const Duration(seconds: 1));
+      // Try Firebase Auth first
+      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email.trim(),
+        password: password,
+      );
 
+      if (credential.user != null) {
+        final userModel = await _firebaseService.getUser(credential.user!.uid);
+        if (userModel != null) {
+          _currentUser = userModel;
+          final dataProvider = DataProvider.of(context, listen: false);
+          await dataProvider.loadData(_currentUser!);
+          _isLoading = false;
+          notifyListeners();
+          return true;
+        }
+      }
+
+      // Fallback to demo data for backward compatibility
       final normalizedEmail = DemoData.normalizeEmail(email);
       final storedPassword = DemoData.passwordForEmail(normalizedEmail);
       final user = DemoData.userForEmail(normalizedEmail);
@@ -76,6 +113,11 @@ class AuthProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
       return true;
+    } on FirebaseAuthException catch (e) {
+      _errorMessage = e.message ?? 'Authentication failed';
+      _isLoading = false;
+      notifyListeners();
+      return false;
     } catch (e) {
       _errorMessage = e.toString();
       _isLoading = false;
@@ -96,19 +138,40 @@ class AuthProvider extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
     try {
-      await Future.delayed(const Duration(seconds: 1));
-      _currentUser = UserModel(
-        id: 'user_${DateTime.now().millisecondsSinceEpoch}',
-        name: name,
-        email: email,
-        role: role,
-        skills: skills,
-        hourlyRate: hourlyRate,
-        createdAt: DateTime.now(),
+      // Create Firebase Auth user
+      final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email.trim(),
+        password: password,
       );
+
+      if (credential.user != null) {
+        final userModel = UserModel(
+          id: credential.user!.uid,
+          name: name,
+          email: email.trim(),
+          role: role,
+          skills: skills,
+          hourlyRate: hourlyRate,
+          createdAt: DateTime.now(),
+        );
+
+        // Save user to Firestore
+        await _firebaseService.addUser(userModel);
+        _currentUser = userModel;
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
+
+      _errorMessage = 'Failed to create user';
       _isLoading = false;
       notifyListeners();
-      return true;
+      return false;
+    } on FirebaseAuthException catch (e) {
+      _errorMessage = e.message ?? 'Registration failed';
+      _isLoading = false;
+      notifyListeners();
+      return false;
     } catch (e) {
       _errorMessage = e.toString();
       _isLoading = false;
@@ -118,6 +181,7 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> signOut() async {
+    await FirebaseAuth.instance.signOut();
     _currentUser = null;
     notifyListeners();
   }

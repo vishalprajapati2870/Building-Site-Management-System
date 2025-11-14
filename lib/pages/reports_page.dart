@@ -20,6 +20,39 @@ class _ReportsPageState extends State<ReportsPage> {
   DateTime _selectedDate = DateTime.now();
 
   String _selectedPeriod = 'Daily';
+  
+  List<TimeLogModel> _filteredTimeLogs = [];
+  
+  @override
+  void initState() {
+    super.initState();
+    _updateFilteredData();
+  }
+  
+  void _updateFilteredData() {
+    final dataProvider = DataProvider.of(context, listen: false);
+    final now = DateTime.now();
+    DateTime startDate;
+    DateTime endDate;
+    
+    if (_selectedPeriod == 'Daily') {
+      startDate = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
+      endDate = startDate.add(const Duration(days: 1));
+    } else if (_selectedPeriod == 'Weekly') {
+      final weekStart = _selectedDate.subtract(Duration(days: _selectedDate.weekday - 1));
+      startDate = DateTime(weekStart.year, weekStart.month, weekStart.day);
+      endDate = startDate.add(const Duration(days: 7));
+    } else { // Monthly
+      startDate = DateTime(_selectedDate.year, _selectedDate.month, 1);
+      endDate = DateTime(_selectedDate.year, _selectedDate.month + 1, 1);
+    }
+    
+    _filteredTimeLogs = dataProvider.timeLogs.where((log) {
+      return log.timestamp.isAfter(startDate) && log.timestamp.isBefore(endDate);
+    }).toList();
+    
+    setState(() {});
+  }
 
   Future<void> _selectDate() async {
     final DateTime? picked = await showDatePicker(
@@ -32,12 +65,19 @@ class _ReportsPageState extends State<ReportsPage> {
       setState(() {
         _selectedDate = picked!;
       });
+      _updateFilteredData();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final dataProvider = DataProvider.of(context, listen: true);
+    // Update filtered data when timeLogs change
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _updateFilteredData();
+      }
+    });
     return Scaffold(
       appBar: AppBar(
         title: const Text('Reports & Analytics'),
@@ -135,6 +175,7 @@ class _ReportsPageState extends State<ReportsPage> {
                               setState(() {
                                 _selectedPeriod = value!;
                               });
+                              _updateFilteredData();
                             },
                           ),
                         ),
@@ -157,7 +198,7 @@ class _ReportsPageState extends State<ReportsPage> {
                 Expanded(
                   child: _MetricCard(
                     title: 'Total Hours',
-                    value: '${dataProvider.timeLogs.length * 8}',
+                    value: _calculateTotalHours().toStringAsFixed(1),
                     unit: 'hrs',
                     icon: Icons.access_time,
                     color: Colors.blue,
@@ -167,7 +208,7 @@ class _ReportsPageState extends State<ReportsPage> {
                 Expanded(
                   child: _MetricCard(
                     title: 'Workers',
-                    value: '${dataProvider.workers.length}',
+                    value: _getUniqueWorkersCount().toString(),
                     unit: 'active',
                     icon: Icons.people,
                     color: Colors.green,
@@ -181,7 +222,7 @@ class _ReportsPageState extends State<ReportsPage> {
                 Expanded(
                   child: _MetricCard(
                     title: 'Sites',
-                    value: '${dataProvider.sites.length}',
+                    value: _getUniqueSitesCount().toString(),
                     unit: 'active',
                     icon: Icons.location_city,
                     color: Colors.orange,
@@ -191,9 +232,8 @@ class _ReportsPageState extends State<ReportsPage> {
                 Expanded(
                   child: _MetricCard(
                     title: 'Check-ins',
-                    value:
-                        '${dataProvider.timeLogs.where((log) => log.type == 'checkin').length}',
-                    unit: 'today',
+                    value: _filteredTimeLogs.where((log) => log.type == 'checkin').length.toString(),
+                    unit: _selectedPeriod.toLowerCase(),
                     icon: Icons.check_circle,
                     color: Colors.purple,
                   ),
@@ -208,7 +248,7 @@ class _ReportsPageState extends State<ReportsPage> {
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            if (dataProvider.timeLogs.isEmpty)
+            if (_filteredTimeLogs.isEmpty)
               Center(
                 child: Padding(
                   padding: const EdgeInsets.all(40),
@@ -223,7 +263,7 @@ class _ReportsPageState extends State<ReportsPage> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'No activity data yet',
+                        'No activity data for selected period',
                         style: TextStyle(
                           color: Theme.of(
                             context,
@@ -238,13 +278,13 @@ class _ReportsPageState extends State<ReportsPage> {
               ListView.separated(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: dataProvider.timeLogs.length > 5
+                itemCount: _filteredTimeLogs.length > 5
                     ? 5
-                    : dataProvider.timeLogs.length,
+                    : _filteredTimeLogs.length,
                 separatorBuilder: (context, index) =>
                     const SizedBox(height: 12),
                 itemBuilder: (context, index) {
-                  final log = dataProvider.timeLogs[index];
+                  final log = _filteredTimeLogs[index];
                   final site = dataProvider.getSiteById(log.siteId);
                   return Card(
                     elevation: 0,
@@ -286,6 +326,38 @@ class _ReportsPageState extends State<ReportsPage> {
         ),
       ),
     );
+  }
+  
+  double _calculateTotalHours() {
+    final checkIns = <String, DateTime>{};
+    final checkOuts = <String, DateTime>{};
+    
+    for (final log in _filteredTimeLogs) {
+      if (log.type == 'checkin') {
+        checkIns[log.workerId] = log.timestamp;
+      } else if (log.type == 'checkout') {
+        checkOuts[log.workerId] = log.timestamp;
+      }
+    }
+    
+    double totalHours = 0;
+    for (final entry in checkIns.entries) {
+      final checkout = checkOuts[entry.key];
+      if (checkout != null) {
+        final duration = checkout.difference(entry.value);
+        totalHours += duration.inMinutes / 60.0;
+      }
+    }
+    
+    return totalHours;
+  }
+  
+  int _getUniqueWorkersCount() {
+    return _filteredTimeLogs.map((log) => log.workerId).toSet().length;
+  }
+  
+  int _getUniqueSitesCount() {
+    return _filteredTimeLogs.map((log) => log.siteId).toSet().length;
   }
 }
 

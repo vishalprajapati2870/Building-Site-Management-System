@@ -21,11 +21,32 @@ class SiteDetailsPage extends StatefulWidget {
 
 @NowaGenerated()
 class _SiteDetailsPageState extends State<SiteDetailsPage> {
+  int _checkedInCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCheckedInCount();
+  }
+
+  void _loadCheckedInCount() async {
+    final dataProvider = DataProvider.of(context, listen: false);
+    final count = await dataProvider.getCheckedInCount(widget.site.id!);
+    if (mounted) {
+      setState(() {
+        _checkedInCount = count;
+      });
+    }
+  }
+
   void _showAssignWorkerDialog() {
     showDialog(
       context: context,
       builder: (context) => AssignWorkerDialog(siteId: widget.site.id!),
-    );
+    ).then((_) {
+      // Reload checked in count after assignment
+      _loadCheckedInCount();
+    });
   }
 
   String _formatTime(DateTime dateTime) {
@@ -55,7 +76,6 @@ class _SiteDetailsPageState extends State<SiteDetailsPage> {
     final siteAssignments = dataProvider.assignments
         .where((a) => a.siteId == widget.site.id)
         .toList();
-    final checkedInCount = dataProvider.getCheckedInCount(widget.site.id!);
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.site.name),
@@ -127,7 +147,7 @@ class _SiteDetailsPageState extends State<SiteDetailsPage> {
                         child: _InfoCard(
                           icon: Icons.people,
                           label: 'Checked In',
-                          value: '${checkedInCount}',
+                          value: '${_checkedInCount}',
                           color: Colors.green,
                         ),
                       ),

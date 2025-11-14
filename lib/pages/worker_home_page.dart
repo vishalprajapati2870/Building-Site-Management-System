@@ -84,21 +84,46 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
 }
 
 @NowaGenerated()
-class _AssignmentsTab extends StatelessWidget {
+class _AssignmentsTab extends StatefulWidget {
   @NowaGenerated({'loader': 'auto-constructor'})
   const _AssignmentsTab({required this.workerId, super.key});
 
   final String workerId;
 
   @override
+  State<_AssignmentsTab> createState() => __AssignmentsTabState();
+}
+
+@NowaGenerated()
+class __AssignmentsTabState extends State<_AssignmentsTab> {
+  List<AssignmentModel> _todayAssignments = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAssignments();
+  }
+
+  Future<void> _loadAssignments() async {
+    final dataProvider = DataProvider.of(context, listen: false);
+    final assignments = await dataProvider.getTodayAssignments(widget.workerId);
+    if (mounted) {
+      setState(() {
+        _todayAssignments = assignments;
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final dataProvider = DataProvider.of(context, listen: true);
-    final todayAssignments = dataProvider.getTodayAssignments(workerId);
     return RefreshIndicator(
-      onRefresh: () async {
-        await Future.delayed(const Duration(seconds: 1));
-      },
-      child: todayAssignments.isEmpty
+      onRefresh: _loadAssignments,
+      child: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _todayAssignments.isEmpty
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -133,10 +158,10 @@ class _AssignmentsTab extends StatelessWidget {
             )
           : ListView.separated(
               padding: const EdgeInsets.all(16),
-              itemCount: todayAssignments.length,
+              itemCount: _todayAssignments.length,
               separatorBuilder: (context, index) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
-                final assignment = todayAssignments[index];
+                final assignment = _todayAssignments[index];
                 final site = dataProvider.getSiteById(assignment.siteId);
                 return AssignmentCard(
                   assignment: assignment,
